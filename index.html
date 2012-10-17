@@ -55,7 +55,7 @@
 <li class="slide" id="get">you get a document with a GET request</li>
 <li class="slide" id="delete">delete with DELETE</li>
 <li class="slide" id="putpost">and add with PUT or POST</li>
-<li class="slide" id="putpost">your reponse is JSON</li>
+<li class="slide" id="putpost">your reponse is JSON(P)</li>
 <li class="slide" id="fullStop">that is it, no driver needed, most language specific frameworks are actually built around an equivelent of CURL</li>
 </ul>
        
@@ -63,10 +63,12 @@
 <section class="slide" id="setup"><h2>Example Project</h2><ul>
 <li class="slide" id="getData">Use a cell phone to take a reading of it's location, all the wifi networks it can see, and their reletive strengths</li>
 <li class="slide" id="getMore">Repeat</li>
-<li class="slide" id="getEvenMore">Alot</li>
-<li class="slide" id="getMAC">Be able to look up by MAC and get location</li>
+<li class="slide" id="getEvenMore">A lot</li>
+<li class="slide" id="trianglulate">Trianglulate where the wifi is base station is.</li>
+<li class="slide" id="getMAC">Be able to look up by MAC and get location.</li>
 <li class="slide" id="wigle">Based off idea behind <a href="http://wigle.net" target="_blank">Wigle</a></li>
 <li class="slide" id="colection">Collected Data using their Android app.</li>
+<li class="slide" id="lame">Wiggle has a pretty late license on it's data set</li>
 
 
 </ul></section>
@@ -76,36 +78,39 @@
    
     </h2>
 <textarea class="code" mode="javascript">{
-    "_id":"2c5012b8970716cd25444d520800e260",
-    "_rev":"1-6eafb16ed8cc5b7820314ba57c1f938a",
-    "networks":[
-        {
-            "Kind":"WIFI",
-            "fs":"2012-08-28 17:11:42",
-            "SSID":"1106 6310",
-            "MAC":"00:24:c8:24:48:00",
-            "ch":"6",
-            "strength":"-97",
-            "modes":"[WEP]"
-        },
-        {
-            "Kind":"WIFI",
-            "fs":"2012-08-28 17:11:42",
-            "SSID":"ScanIt_Mobile",
-            "MAC":"00:15:2c:48:33:10",
-            "ch":"6",
-            "strength":"-97",
-            "modes":"[ESS]"
-        }
-    ],
-    "point":{
-        "acc":"3",
-        "loc":{
-            "lat":"42.25301085",
-            "lng":"-70.9934717333"
-        },
-        "alt":"13.8"
-    }
+   "_id": "086a433c0bf67f74c8db7cb76f00661e",
+   "_rev": "1-bad21258703963df0db8f19e50be6a8c",
+   "networks": [
+       {
+           "Kind": "WIFI",
+           "ch": 6,
+           "SSID": "ssmh",
+           "MAC": "00:1c:10:67:cf:58",
+           "strength": -99,
+           "firstSeen": "2012-07-07 20:00:33",
+           "modes": "[WEP][ESS]"
+       },
+       {
+           "Kind": "WIFI",
+           "ch": 6,
+           "SSID": "Doghaus",
+           "MAC": "00:14:bf:0e:ae:45",
+           "strength": -88,
+           "firstSeen": "2012-07-07 20:00:33",
+           "modes": ""
+       }
+   ],
+   "point": {
+       "geometry": {
+           "type": "Point",
+           "coordinates": [
+               -71.00027165,
+               42.2485218333,
+               13.7
+           ]
+       },
+       "acc": 4
+   }
 }</textarea>
 
 </section>
@@ -126,58 +131,50 @@
         }
     },
     "lists":{
-        "listName":function, we'll get to this
+        "listName":function, we will get to this
     },
     "etc":{
-        "name": there are a few different types, we won't get to all
+        "name": there are a few different types, we wont get to all
     }
     
 }</textarea>
 </section><section class="slide" id="map">
     <h2>
         MAP
-    </h2><textarea class="code" mode="javascript">
-function(doc) {
-   if(doc.networks && doc.networks.length>0){
-        if(doc.point&&doc.point.acc&&parseInt(doc.point.acc)<100){    
-            var geometry= {
-                "type": "Point",
-                coordinates:[               
-                    parseFloat(doc.point.loc.lng),
-                    parseFloat(doc.point.loc.lat),
-                    parseInt(doc.point.alt)
-                ]
-            };
+    </h2><textarea class="code" mode="javascript">function(doc) {
+    if(doc.networks && doc.networks.length>0){
+        if(doc.point && doc.point.acc && doc.point.acc<100){
             doc.networks.forEach(function(m){
-                var out ={geometry:geometry};
-                out.strength=parseInt(m.strength);
+                var out ={
+                    geometry:doc.point.geometry
+                };
+                out.strength=m.strength;
                 out.SSID=m.SSID;
                 out.MAC=m.MAC;
                 emit(m.MAC,out);
             })
         }
     }
-}
-</textarea>
+}</textarea>
 </section><section class="slide" id="reduce"><h2>REDUCE</h2><textarea class="code" mode="javascript">function (key, values){
     function red(a,b){
-        var wa = Math.pow(a.strength,2);
-        var wb = Math.pow(b.strength,2);
-        var qa=wa/(wa+wb);
-        var qb=wb/(wa+wb);
-        var r={
-            SSID:a.SSID,
-            MAC:a.MAC,
-            geometry:{
-                "type": "Point"
-            }
-        };
-        function weightedAverage(v,i){
+            var wa = Math.pow(a.strength,2);
+            var wb = Math.pow(b.strength,2);
+            var qa=wa/(wa+wb);
+            var qb=wb/(wa+wb);
+            var r={
+                SSID:a.SSID,
+                MAC:a.MAC,
+                geometry:{
+                    "type": "Point"
+                }
+            };
+            function weightedAverage(v,i){
                 return (v*qa)+(b.geometry.coordinates[i]*qb);
-        }
-        r.geometry.coordinates=a.geometry.coordinates.map(weightedAverage);
-        r.strength=(a.strength*qa)+(b.strength*qb);
-        return r;
+            }
+            r.geometry.coordinates=a.geometry.coordinates.map(weightedAverage);
+            r.strength=(a.strength*qa)+(b.strength*qb);
+            return r;   
     }
     return values.reduce(red);
 }</textarea></section><section class="slide" id="result"><h2>key="f4:ec:38:c1:99:10"</h2>
@@ -191,12 +188,12 @@ function(doc) {
                 "geometry":{
                     "type":"Point",
                     "coordinates":[
-                        -70.987100140176437435,
-                        42.249797198590130165,
-                        13.03995438124339401
+                        -70.986938833379554126,
+                        42.249992754916803506,
+                        12.876801096014341752
                     ]
                 },
-                "strength":-81.524215627584908361
+                "strength":-87.22256733011508345
             }
         }
     ]
@@ -212,12 +209,12 @@ function(doc) {
                 "geometry":{
                     "type":"Point",
                     "coordinates":[
-                        -70.98752037870970355,
-                        42.249932564158058312,
-                        13.525162057459191089
+                        -70.986552249173101359,
+                        42.249937747100815955,
+                        15.080525466129262924
                     ]
                 },
-                "strength":-81.858036681635525156
+                "strength":-84.39010461819162856
             }
         },
         {
@@ -228,7 +225,7 @@ function(doc) {
                     "coordinates":[
                         -71.053958783300004143,
                         42.364249083300002496,
-                        31
+                        31.100000000000001421
                     ]
                 },
                 "strength":-99,
@@ -237,7 +234,7 @@ function(doc) {
             }
         }
     ]
-}</textarea></section><section class="slide" id="example"><h2>try f4:ec:38:c1:99:10</h2><iframe src="http://calvin.iriscouch.com/w/_design/w/index.html" width="900" height="600"></iframe></section>
+}</textarea></section><section class="slide" id="example"><h2>try f4:ec:38:c1:99:10</h2><iframe src="http://calvin.iriscouch.com/couchfi/_design/w/index.html" width="900" height="600"></iframe></section>
 <section class="slide" id="spatial"><h2>spatial</h2>
 <textarea class="code" mode="javascript">function (doc){
     if(doc.geometry){
@@ -268,7 +265,31 @@ function(doc) {
     if ('callback' in req.query){
         send(")");
     }
-}</textarea></section>
+}</textarea></section><section class="slide" id="exampleTwo"><h2>every move recomputes the bounding box</h2><iframe src="http://calvin.iriscouch.com/poi/_design/geo/index.html" width="900" height="600"></iframe></section>
+<section class="slide" id="IsItRight">
+<h2>When should you use couchDB?</h2>
+<ul>
+<li class="slide" id="moveingStuff">Are you inmporting and exporting massive chunks of data?</li>
+<li class="slide" id="dynamicCalc">Do you need to agilely compute dynamic calculations?</li>
+<li class="slide" id="sql">Do you want to use SQL</li>
+<li class="slide" id="join">Do you want to join data</li>
+</ul>
+</section>
+<section class="slide" id="IsItRight">
+<h2>Then CouchDB is probobly not the right choice, use couch if:</h2>
+<ul>
+<li class="slide" id="incremental">You want to add new records gradually with out recalculating the indexes.</li>
+<li class="slide" id="replication">You want to keep DBs on seperate machines synced either mutually or oneway.</li>
+<li class="slide" id="javacoffee">Being able to use (Java|Coffee)Script to query your data</li>
+<li class="slide" id="MapReduce">You have a problem Map/Reduce solves</li>
+</ul>
+</section><section class="slide" id="fin">
+<h2>Repos</h2>
+<ul>
+<li><a href="https://github.com/calvinmetcalf/glowing-hipster" target="_blank">This Presentation</a></li>
+<li><a href="https://github.com/calvinmetcalf/COUCHFI" target="_blank">WiFi Example</a></li>
+</ul>
+</section>
 <!-- End slides. -->
 
 
