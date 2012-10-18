@@ -19,12 +19,12 @@
 	<link rel="stylesheet" href="extensions/scale/deck.scale.css">
     <link rel="stylesheet" href="extensions/codemirror/deck.codemirror.css">
     <link rel="stylesheet" href="extensions/codemirror/themes/default.css">
-    <!--<link rel="stylesheet" href="extensions/codemirror/mode/erlang/erlang">
-	 Style theme. More available in /themes/style/ or create your own. -->
+    <link rel="stylesheet" href="extensions/codemirror/mode/coffeescript/coffeescript.css">
+	 <!--Style theme. More available in /themes/style/ or create your own. -->
 	<link rel="stylesheet" href="themes/style/swiss.css">
 	
 	<!-- Transition theme. More available in /themes/transition/ or create your own. -->
-	<link rel="stylesheet" href="themes/transition/horizontal-slide.css">
+	<link rel="stylesheet" href="themes/transition/cube.css">
 	
 	<!-- Required Modernizr file -->
 	<script src="modernizr.custom.js"></script>
@@ -52,7 +52,9 @@
                     <li class="slide" id="json">Instead or "Rows" it has "Documents", these are written in JSON</li>
                     <li class="slide" id="mapred">Instead of SQL it&nbsp;uses Map/Reduce</li>
                     <li class="slide" id="dd">Instead of Queries it has Design Documents</li>
-                    <li class="slide" id="jce">Design Documents are written in JavaScript or CoffeeScript (or Erlang if you enable it).</li>
+                    <li class="slide" id="jce">Design Documents are written in JavaScript or CoffeeScript by default</li>
+                    <li class="slide" id="erl">or native Erlang if you enable it.</li>
+                    <li class="slide" id="py">or you can write your own view server in your language of choice, a bunch already exist like python</li>
                 </ul>
 
 </section><section class="slide" id="REST">
@@ -174,9 +176,18 @@
         out.strength = m.strength
         out.SSID = m.SSID
         out.MAC = m.MAC
-        emit m.MAC, out
-</textarea>
-
+        emit m.MAC, out</textarea>
+<textarea class="code" mode="python">
+# python version
+@map_function
+def my_map_function(doc):
+    if "networks" in doc and len(doc["neworks"]) > 0:
+        if "point" in doc and "acc" in doc["point"] and doc["point"]["acc"] <100:
+            for m in doc["neworks"]:
+                out = {"geometry":doc["point"]["geometry"]}
+                for n in ["strength","SSID","MAC"]:
+                    out[n]=m[n]
+                emit(m["MAC"], out)</textarea>
 </section><section class="slide" id="reduce"><h2>REDUCE</h2><textarea class="code" mode="javascript">function (key, values){
     function red(a,b){
             var wa = Math.pow(a.strength,2);
@@ -261,13 +272,11 @@
     if(doc.geometry){
         emit(doc.geometry, doc);
     }
-}
-</textarea>
+}</textarea>
 <textarea class="code" mode="coffeescript">
 # equivilent in CoffeeScript
 (doc)->
-    emit doc.geometry, doc if doc.geometry
-</textarea><textarea class="code" mode="erlang">
+    emit doc.geometry, doc if doc.geometry</textarea><textarea class="code" mode="erlang">
 % equivilent in Erlang
 fun({Doc}) ->
   case proplists:get_value(<<"geometry">>, Doc) of
@@ -276,8 +285,7 @@ fun({Doc}) ->
     Geo ->
         Emit(Geo, Doc)
     end
-end.
-</textarea></section><section class="slide" id="spatialist"><h2>spatial list (spatialist)</h2>
+end.</textarea></section><section class="slide" id="spatialist"><h2>spatial list (spatialist)</h2>
 <textarea class="code" mode="javascript">function (head, req){
     var row, out, sep = '\\n';
     if (typeof(req.headers.Accept) != "undefined" && req.headers.Accept.indexOf('application/json')!=-1){
@@ -376,6 +384,7 @@ end.
 <script src="extensions/codemirror/mode/javascript/javascript.js"></script>
 <script src="extensions/codemirror/mode/coffeescript/coffeescript.js"></script>
 <script src="extensions/codemirror/mode/erlang/erlang.js"></script>
+<script src="extensions/codemirror/mode/python/python.js"></script>
 <!-- Initialize the deck. You can put this in an external file if desired. -->
 <script>
 	$(function() {
