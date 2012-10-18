@@ -19,8 +19,9 @@
 	<link rel="stylesheet" href="extensions/scale/deck.scale.css">
     <link rel="stylesheet" href="extensions/codemirror/deck.codemirror.css">
     <link rel="stylesheet" href="extensions/codemirror/themes/default.css">
-	<!-- Style theme. More available in /themes/style/ or create your own. -->
-	<link rel="stylesheet" href="themes/style/web-2.0.css">
+    <!--<link rel="stylesheet" href="extensions/codemirror/mode/erlang/erlang">
+	 Style theme. More available in /themes/style/ or create your own. -->
+	<link rel="stylesheet" href="themes/style/swiss.css">
 	
 	<!-- Transition theme. More available in /themes/transition/ or create your own. -->
 	<link rel="stylesheet" href="themes/transition/horizontal-slide.css">
@@ -33,12 +34,19 @@
 <!-- Begin slides. Just make elements with a class of slide. -->
 
 <section class="slide" id="hello">
- <h1>couchdb</h1>
-        <p>Taking a REST on the GeoCouch</p>
+<hgroup><h1>Couchdb</h1><h3>Taking a REST on the GeoCouch</h3></hgroup>
 </section>
-
+<section class="slide" id="who">
+<h2>"Users"</h2>
+<ul>
+<li class="slide" id="uORd">Maybe should have thought a little bit longer when Guido asked me if it was for Users or Developers</li>
+<li class="slide" id="uOFc">Its for (future) users of CouchDB</li>
+<li class="slide" id="butWho">Who are the actual "users" of a DB?</li>
+<li class="slide" id="devs">Developers</li>
+</ul>
+</section>
 <section class="slide" id="wtf">
-<h2>WTF?</h2>
+<h2>What?</h2>
                 <ul>
                     <li class="slide" id="nosql">CouchDB is a NOSQL database</li>
                     <li class="slide" id="json">Instead or "Rows" it has "Documents", these are written in JSON</li>
@@ -77,7 +85,7 @@
        DOC
    
     </h2>
-<textarea class="code" mode="javascript">{
+<textarea class="code" mode="application/json">{
    "_id": "086a433c0bf67f74c8db7cb76f00661e",
    "_rev": "1-bad21258703963df0db8f19e50be6a8c",
    "networks": [
@@ -118,7 +126,7 @@
 
 
 <h2>Design Doc</h2>
-<textarea class="code" mode="javascript">{
+<textarea class="code" mode="application/json">{
     "_id":"_design/whatever",
     "views":{
         "ViewName":{
@@ -131,10 +139,10 @@
         }
     },
     "lists":{
-        "listName":function, we will get to this
+        "listName":"function, we will get to this"
     },
     "etc":{
-        "name": there are a few different types, we wont get to all
+        "name": "there are a few different types, we wont get to all"
     }
     
 }</textarea>
@@ -156,6 +164,19 @@
         }
     }
 }</textarea>
+<textarea class="code" mode="coffeescript">
+# equivilent in CoffeeScript
+(doc) ->
+  if doc.networks and doc.networks.length > 0
+    if doc.point and doc.point.acc and doc.point.acc < 100
+      doc.networks.forEach (m) ->
+        out = geometry: doc.point.geometry
+        out.strength = m.strength
+        out.SSID = m.SSID
+        out.MAC = m.MAC
+        emit m.MAC, out
+</textarea>
+
 </section><section class="slide" id="reduce"><h2>REDUCE</h2><textarea class="code" mode="javascript">function (key, values){
     function red(a,b){
             var wa = Math.pow(a.strength,2);
@@ -178,7 +199,7 @@
     }
     return values.reduce(red);
 }</textarea></section><section class="slide" id="result"><h2>key="f4:ec:38:c1:99:10"</h2>
-<textarea class="code" mode="javascript">{
+<textarea class="code" mode="application/json">{
     "rows":[
         {
             "key":null,
@@ -199,7 +220,7 @@
     ]
 }</textarea></section>
 <section class="slide" id="results"><h2>group=true&limit=2&startkey="f4:ec:38:c1:99:10"</h2>
-<textarea class="code" mode="javascript">{
+<textarea class="code" mode="application/json">{
     "rows":[
         {
             "key":"f4:ec:38:c1:99:10",
@@ -241,6 +262,21 @@
         emit(doc.geometry, doc);
     }
 }
+</textarea>
+<textarea class="code" mode="coffeescript">
+# equivilent in CoffeeScript
+(doc)->
+    emit doc.geometry, doc if doc.geometry
+</textarea><textarea class="code" mode="erlang">
+% equivilent in Erlang
+fun({Doc}) ->
+  case proplists:get_value(<<"geometry">>, Doc) of
+    undefined ->
+        ok;
+    Geo ->
+        Emit(Geo, Doc)
+    end
+end.
 </textarea></section><section class="slide" id="spatialist"><h2>spatial list (spatialist)</h2>
 <textarea class="code" mode="javascript">function (head, req){
     var row, out, sep = '\\n';
@@ -275,7 +311,7 @@
 <li class="slide" id="join">Do you want to join data</li>
 </ul>
 </section>
-<section class="slide" id="IsItRight">
+<section class="slide" id="no">
 <h2>Then CouchDB is probobly not the right choice, use couch if:</h2>
 <ul>
 <li class="slide" id="incremental">You want to add new records gradually with out recalculating the indexes.</li>
@@ -283,7 +319,7 @@
 <li class="slide" id="javacoffee">Being able to use (Java|Coffee)Script to query your data</li>
 <li class="slide" id="MapReduce">You have a problem Map/Reduce solves</li>
 </ul>
-</section><section class="slide" id="fin">
+</section><section class="slide" id="exampleThree"><h2>all of 'em</h2><iframe src="map.html#5/43.501/-64.204" width="900" height="600"></iframe></section><section class="slide" id="fin">
 <h2>Repos</h2>
 <ul>
 <li><a href="https://github.com/calvinmetcalf/glowing-hipster" target="_blank">This Presentation</a></li>
@@ -338,6 +374,8 @@
 <script src="extensions/codemirror/deck.codemirror.js"></script>
 <script src="extensions/codemirror/codemirror.js"></script>
 <script src="extensions/codemirror/mode/javascript/javascript.js"></script>
+<script src="extensions/codemirror/mode/coffeescript/coffeescript.js"></script>
+<script src="extensions/codemirror/mode/erlang/erlang.js"></script>
 <!-- Initialize the deck. You can put this in an external file if desired. -->
 <script>
 	$(function() {
