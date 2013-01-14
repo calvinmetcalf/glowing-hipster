@@ -19,7 +19,7 @@
         <link rel="stylesheet" href="http://danzel.github.com/Leaflet.markercluster/dist/MarkerCluster.Default.ie.css" />
     <![endif]-->
     <script src="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet.js"></script>
-    <script type="text/javascript" src="http://calvinmetcalf.github.com/leaflet-hash/leaflet-hash.js"></script>
+    <script type="text/javascript" src="http://calvinmetcalf.github.com/leaflet-hash/dist/leaflet-hash.js"></script>
     <script type="text/javascript" src="http://calvinmetcalf.github.com/leaflet-providers/leaflet-providers.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script src="http://danzel.github.com/Leaflet.markercluster/dist/leaflet.markercluster-src.js"></script>
@@ -40,8 +40,8 @@
         var clusters = new L.MarkerClusterGroup();
         function onEachFeature(feature, layer) {
     // does this feature have a property named popupContent?
-    if (feature.properties && feature.properties.SSID) {
-        layer.bindPopup(feature.properties.SSID);
+    if (feature.properties && feature.properties.OutfallShape) {
+        layer.bindPopup(feature.properties.OutfallShape);
     }
 }
         points = L.geoJson(data.features,{
