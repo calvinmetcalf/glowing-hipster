@@ -9,17 +9,16 @@
       body { height: 100%; margin: 0; padding: 0;}
       #map{ height: 100% }
     </style>
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet.css" />
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.css" />
     <!--[if lte IE 8]>
-        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet.ie.css" />
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.ie.css" />
     <![endif]-->
     <link rel="stylesheet" href="http://danzel.github.com/Leaflet.markercluster/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="http://danzel.github.com/Leaflet.markercluster/dist/MarkerCluster.Default.css" />
     <!--[if lte IE 8]>
         <link rel="stylesheet" href="http://danzel.github.com/Leaflet.markercluster/dist/MarkerCluster.Default.ie.css" />
     <![endif]-->
-    <script src="http://cdn.leafletjs.com/leaflet-0.4.4/leaflet.js"></script>
-    <script type="text/javascript" src="http://calvinmetcalf.github.com/leaflet-hash/dist/leaflet.hash.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.js"></script>
     <script type="text/javascript" src="http://calvinmetcalf.github.com/leaflet-providers/leaflet-providers.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script src="http://danzel.github.com/Leaflet.markercluster/dist/leaflet.markercluster-src.js"></script>
@@ -33,7 +32,7 @@
         zoom: 8,
         attributionControl: true
     });
-    var h = new L.Hash(m);
+ 
     var points;
     m.addLayer(L.tileLayer.mapQuestOpen.osm());
       $.get("w.json", function(data) {
